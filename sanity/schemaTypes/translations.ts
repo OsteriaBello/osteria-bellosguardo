@@ -1,0 +1,88 @@
+import { defineType, defineField } from 'sanity'
+
+export default defineType({
+  name: 'translations',
+  title: 'Translations',
+  type: 'document',
+  fields: [
+    defineField({
+      name: 'nav',
+      title: 'Navigation',
+      type: 'object',
+      fields: [
+        { name: 'menuPt', title: 'Menu (PT)', type: 'string' },
+        { name: 'menuEn', title: 'Menu (EN)', type: 'string' },
+        { name: 'newsPt', title: 'News (PT)', type: 'string' },
+        { name: 'newsEn', title: 'News (EN)', type: 'string' },
+        { name: 'galleryPt', title: 'Gallery (PT)', type: 'string' },
+        { name: 'galleryEn', title: 'Gallery (EN)', type: 'string' },
+        { name: 'reservationsPt', title: 'Reservations (PT)', type: 'string' },
+        { name: 'reservationsEn', title: 'Reservations (EN)', type: 'string' },
+      ],
+    }),
+    defineField({
+      name: 'menu',
+      title: 'Menu Section',
+      type: 'object',
+      fields: [
+        { name: 'titlePt', title: 'Title (PT)', type: 'string' },
+        { name: 'titleEn', title: 'Title (EN)', type: 'string' },
+        { name: 'descriptionPt', title: 'Description (PT)', type: 'text' },
+        { name: 'descriptionEn', title: 'Description (EN)', type: 'text' },
+        { name: 'foodMenuBtnPt', title: 'Food Menu Button (PT)', type: 'string' },
+        { name: 'foodMenuBtnEn', title: 'Food Menu Button (EN)', type: 'string' },
+        { name: 'drinksMenuBtnPt', title: 'Drinks Menu Button (PT)', type: 'string' },
+        { name: 'drinksMenuBtnEn', title: 'Drinks Menu Button (EN)', type: 'string' },
+        { name: 'foodMenuTitlePt', title: 'Food Menu Title (PT)', type: 'string' },
+        { name: 'foodMenuTitleEn', title: 'Food Menu Title (EN)', type: 'string' },
+        { name: 'drinksMenuTitlePt', title: 'Drinks Menu Title (PT)', type: 'string' },
+        { name: 'drinksMenuTitleEn', title: 'Drinks Menu Title (EN)', type: 'string' },
+      ],
+    }),
+    defineField({
+      name: 'news',
+      title: 'News Section',
+      type: 'object',
+      fields: [
+        { name: 'titlePt', title: 'Title (PT)', type: 'string' },
+        { name: 'titleEn', title: 'Title (EN)', type: 'string' },
+        { name: 'subtitlePt', title: 'Subtitle (PT)', type: 'string' },
+        { name: 'subtitleEn', title: 'Subtitle (EN)', type: 'string' },
+        { name: 'noNewsPt', title: 'No News Message (PT)', type: 'string' },
+        { name: 'noNewsEn', title: 'No News Message (EN)', type: 'string' },
+        { name: 'typeNewsPt', title: 'Type News (PT)', type: 'string' },
+        { name: 'typeNewsEn', title: 'Type News (EN)', type: 'string' },
+        { name: 'typeEventPt', title: 'Type Event (PT)', type: 'string' },
+        { name: 'typeEventEn', title: 'Type Event (EN)', type: 'string' },
+        { name: 'typeAnnouncementPt', title: 'Type Announcement (PT)', type: 'string' },
+        { name: 'typeAnnouncementEn', title: 'Type Announcement (EN)', type: 'string' },
+      ],
+    }),
+    defineField({
+      name: 'form',
+      title: 'Form Labels',
+      type: 'object',
+      fields: [
+        { name: 'fullNamePt', title: 'Full Name (PT)', type: 'string' },
+        { name: 'fullNameEn', title: 'Full Name (EN)', type: 'string' },
+        { name: 'datePt', title: 'Date (PT)', type: 'string' },
+        { name: 'dateEn', title: 'Date (EN)', type: 'string' },
+        { name: 'timePt', title: 'Time (PT)', type: 'string' },
+        { name: 'timeEn', title: 'Time (EN)', type: 'string' },
+        { name: 'guestsPt', title: 'Guests (PT)', type: 'string' },
+        { name: 'guestsEn', title: 'Guests (EN)', type: 'string' },
+        { name: 'personPt', title: 'Person (PT)', type: 'string' },
+        { name: 'personEn', title: 'Person (EN)', type: 'string' },
+        { name: 'peoplePt', title: 'People (PT)', type: 'string' },
+        { name: 'peopleEn', title: 'People (EN)', type: 'string' },
+        { name: 'reservePt', title: 'Reserve Button (PT)', type: 'string' },
+        { name: 'reserveEn', title: 'Reserve Button (EN)', type: 'string' },
+      ],
+    }),
+  ],
+  preview: {
+    prepare() {
+      return { title: 'Translations' }
+    },
+  },
+})

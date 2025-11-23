@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Calendar, Clock, Newspaper, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useSanityData } from '../contexts/SanityDataContext';
+import { getImageUrl } from '../lib/sanityClient';
 import { supabase } from '../lib/supabase';
 
-interface NewsItem {
+interface SupabaseNewsItem {
   id: string;
   title_pt: string;
   title_en: string;
@@ -18,55 +20,49 @@ interface NewsItem {
 
 const News: React.FC = () => {
   const { t, language } = useLanguage();
-  const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: sanityData, loading: sanityLoading } = useSanityData();
+  const [supabaseNews, setSupabaseNews] = useState<SupabaseNewsItem[]>([]);
+  const [supabaseLoading, setSupabaseLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
 
   const itemsPerPage = 3;
-  const totalPages = Math.ceil(newsItems.length / itemsPerPage);
 
   useEffect(() => {
-    fetchNews();
+    fetchSupabaseNews();
   }, []);
 
-  const fetchNews = async () => {
+  const fetchSupabaseNews = async () => {
     try {
-      setLoading(true);
-      setError(null);
-
+      setSupabaseLoading(true);
       if (!supabase) {
-        console.error('Supabase client is not initialized');
-        setError('Database connection not available');
-        setLoading(false);
+        setSupabaseLoading(false);
         return;
       }
-
       const { data, error: fetchError } = await supabase
         .from('news')
         .select('*')
         .eq('published', true)
         .order('created_at', { ascending: false })
         .limit(6);
-
       if (fetchError) {
-        console.error('Error fetching news:', fetchError);
         setError(fetchError.message);
-        setLoading(false);
-        return;
+      } else if (data) {
+        setSupabaseNews(data);
       }
-
-      if (data) {
-        setNewsItems(data);
-      }
-
-      setLoading(false);
     } catch (err) {
-      console.error('Unexpected error:', err);
-      setError('An unexpected error occurred');
-      setLoading(false);
+      console.error('Supabase fetch error:', err);
+    } finally {
+      setSupabaseLoading(false);
     }
   };
+
+  // Use Sanity news if available, otherwise fallback to Supabase
+  const sanityNews = sanityData?.news || [];
+  const newsItems = sanityNews.length > 0 ? sanityNews : supabaseNews;
+  const loading = sanityLoading && supabaseLoading;
+
+  const totalPages = Math.ceil(newsItems.length / itemsPerPage);
 
   const formatDate = (dateString: string) => {
     try {
@@ -85,37 +81,15 @@ const News: React.FC = () => {
     try {
       const date = new Date(dateString);
       const day = date.getDate();
-      const month = date.toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', {
-        month: 'short',
-      });
+      const month = date.toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', { month: 'short' });
       return { day, month };
     } catch {
       return { day: '', month: '' };
     }
   };
 
-  const getTypeLabel = (type: string) => {
-    return t(`news.type.${type}`);
-  };
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'event':
-        return 'bg-[#d4896b] text-white';
-      case 'announcement':
-        return 'bg-[#6b7b5a] text-white';
-      default:
-        return 'bg-[#1a472a] text-white';
-    }
-  };
-
-  const nextPage = () => {
-    setCurrentPage((prev) => (prev + 1) % totalPages);
-  };
-
-  const prevPage = () => {
-    setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages);
-  };
+  const nextPage = () => setCurrentPage((prev) => (prev + 1) % totalPages);
+  const prevPage = () => setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages);
 
   const getCurrentPageItems = () => {
     const startIndex = currentPage * itemsPerPage;
@@ -135,7 +109,7 @@ const News: React.FC = () => {
     );
   }
 
-  if (error) {
+  if (error && newsItems.length === 0) {
     return (
       <section id="novidades" className="py-20 bg-[#f8f6f2] texture-overlay">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -178,7 +152,6 @@ const News: React.FC = () => {
             {t('news.subtitle')}
           </p>
         </div>
-
         <div className="relative">
           {totalPages > 1 && (
             <>
@@ -189,7 +162,6 @@ const News: React.FC = () => {
               >
                 <ChevronLeft size={24} className="group-hover:scale-110 transition-transform" />
               </button>
-
               <button
                 onClick={nextPage}
                 className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 lg:translate-x-16 z-10 bg-white hover:bg-[#d4896b] text-[#6b7b5a] hover:text-white p-3 rounded-full shadow-lg transition-all duration-300 group"
@@ -199,70 +171,68 @@ const News: React.FC = () => {
               </button>
             </>
           )}
-
           <div className="overflow-hidden">
-            <div
-              className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 transition-all duration-500"
-            >
-              {getCurrentPageItems().map((item) => (
-                <article
-                  key={item.id}
-                  className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 group border border-[#6b7b5a]/10 hover:-translate-y-1"
-                >
-                  {item.image_url ? (
-                    <div className="relative aspect-[16/10] overflow-hidden bg-gray-100">
-                      <img
-                        src={item.image_url}
-                        alt={language === 'pt' ? item.title_pt : item.title_en}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                        loading="lazy"
-                      />
-                      {item.event_date && (
-                        <div className="absolute top-4 right-4 bg-[#d4896b] text-white rounded-lg shadow-lg px-3 py-2">
-                          <div className="flex items-center gap-2">
-                            <span className="text-2xl font-bold leading-none">
-                              {formatDateBadge(item.event_date).day}
-                            </span>
-                            <span className="text-xs uppercase font-medium">
-                              {formatDateBadge(item.event_date).month}
-                            </span>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 transition-all duration-500">
+              {getCurrentPageItems().map((item) => {
+                const isSanity = 'titlePt' in item;
+                const title = isSanity
+                  ? (language === 'pt' ? item.titlePt : item.titleEn)
+                  : (language === 'pt' ? (item as SupabaseNewsItem).title_pt : (item as SupabaseNewsItem).title_en);
+                const content = isSanity
+                  ? (language === 'pt' ? item.contentPt : item.contentEn)
+                  : (language === 'pt' ? (item as SupabaseNewsItem).content_pt : (item as SupabaseNewsItem).content_en);
+                const imageUrl = isSanity
+                  ? getImageUrl(item.image, item.imageUrl)
+                  : (item as SupabaseNewsItem).image_url;
+                const eventDate = isSanity ? item.eventDate : (item as SupabaseNewsItem).event_date;
+                const key = isSanity ? item._id : (item as SupabaseNewsItem).id;
+
+                return (
+                  <article
+                    key={key}
+                    className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 group border border-[#6b7b5a]/10 hover:-translate-y-1"
+                  >
+                    {imageUrl ? (
+                      <div className="relative aspect-[16/10] overflow-hidden bg-gray-100">
+                        <img
+                          src={imageUrl}
+                          alt={title || ''}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                          loading="lazy"
+                        />
+                        {eventDate && (
+                          <div className="absolute top-4 right-4 bg-[#d4896b] text-white rounded-lg shadow-lg px-3 py-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-2xl font-bold leading-none">{formatDateBadge(eventDate).day}</span>
+                              <span className="text-xs uppercase font-medium">{formatDateBadge(eventDate).month}</span>
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-[#6b7b5a] to-[#1a472a] flex items-center justify-center">
-                      <Newspaper size={64} className="text-white/20" />
-                      {item.event_date && (
-                        <div className="absolute top-4 right-4 bg-[#d4896b] text-white rounded-lg shadow-lg px-3 py-2">
-                          <div className="flex items-center gap-2">
-                            <span className="text-2xl font-bold leading-none">
-                              {formatDateBadge(item.event_date).day}
-                            </span>
-                            <span className="text-xs uppercase font-medium">
-                              {formatDateBadge(item.event_date).month}
-                            </span>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-[#6b7b5a] to-[#1a472a] flex items-center justify-center">
+                        <Newspaper size={64} className="text-white/20" />
+                        {eventDate && (
+                          <div className="absolute top-4 right-4 bg-[#d4896b] text-white rounded-lg shadow-lg px-3 py-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-2xl font-bold leading-none">{formatDateBadge(eventDate).day}</span>
+                              <span className="text-xs uppercase font-medium">{formatDateBadge(eventDate).month}</span>
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
+                    )}
+                    <div className="p-6">
+                      <h3 className="text-xl font-serif italic mb-3 text-[#6b7b5a] line-clamp-2 group-hover:text-[#d4896b] transition-colors">
+                        {title}
+                      </h3>
+                      <p className="text-gray-600 mb-4 line-clamp-3 text-sm leading-relaxed">{content}</p>
                     </div>
-                  )}
-
-                  <div className="p-6">
-                    <h3 className="text-xl font-serif italic mb-3 text-[#6b7b5a] line-clamp-2 group-hover:text-[#d4896b] transition-colors">
-                      {language === 'pt' ? item.title_pt : item.title_en}
-                    </h3>
-
-                    <p className="text-gray-600 mb-4 line-clamp-3 text-sm leading-relaxed">
-                      {language === 'pt' ? item.content_pt : item.content_en}
-                    </p>
-
-                  </div>
-                </article>
-              ))}
+                  </article>
+                );
+              })}
             </div>
           </div>
-
           {totalPages > 1 && (
             <div className="flex justify-center gap-2 mt-8">
               {Array.from({ length: totalPages }).map((_, index) => (
@@ -270,9 +240,7 @@ const News: React.FC = () => {
                   key={index}
                   onClick={() => setCurrentPage(index)}
                   className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                    index === currentPage
-                      ? 'bg-[#d4896b] w-8'
-                      : 'bg-gray-300 hover:bg-gray-400'
+                    index === currentPage ? 'bg-[#d4896b] w-8' : 'bg-gray-300 hover:bg-gray-400'
                   }`}
                   aria-label={`Page ${index + 1}`}
                 />

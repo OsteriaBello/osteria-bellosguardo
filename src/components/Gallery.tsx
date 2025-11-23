@@ -1,5 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import ImageCarousel from './ImageCarousel';
+import { useSanityData } from '../contexts/SanityDataContext';
+import { useLanguage } from '../contexts/LanguageContext';
+import { getImageUrl } from '../lib/sanityClient';
 
 interface GalleryProps {
   images: {
@@ -8,8 +11,10 @@ interface GalleryProps {
   }[];
 }
 
-const Gallery: React.FC<GalleryProps> = ({ images }) => {
+const Gallery: React.FC<GalleryProps> = ({ images: fallbackImages }) => {
   const galleryRef = useRef<HTMLDivElement>(null);
+  const { data } = useSanityData();
+  const { language } = useLanguage();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -37,18 +42,26 @@ const Gallery: React.FC<GalleryProps> = ({ images }) => {
     return () => observer.disconnect();
   }, []);
 
+  // Use Sanity data if available, otherwise fallback
+  const galleryImages = data?.gallery?.images && data.gallery.images.length > 0
+    ? data.gallery.images.map((img) => ({
+        url: getImageUrl(img.image, img.imageUrl),
+        alt: language === 'pt' ? img.altPt || '' : img.altEn || '',
+      }))
+    : fallbackImages;
+
   return (
     <>
-      {/* Version mobile : Carrousel */}
+      {/* Mobile: Carousel */}
       <div className="md:hidden">
-        <ImageCarousel images={images} />
+        <ImageCarousel images={galleryImages} />
       </div>
 
-      {/* Version desktop : Grille */}
+      {/* Desktop: Grid */}
       <div ref={galleryRef} className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {images.map((image, index) => (
+        {galleryImages.map((image, index) => (
           <div
-            key={image.url}
+            key={image.url + index}
             className="gallery-item aspect-[4/5] group relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300"
           >
             <img
