@@ -4,6 +4,7 @@ import Router from './Router.tsx';
 import './index.css';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { AuthProvider } from './contexts/AuthContext';
+import { SanityDataProvider } from './contexts/SanityDataContext';
 
 function ScrollObserver() {
   useEffect(() => {
@@ -30,8 +31,10 @@ function Root() {
     <StrictMode>
       <AuthProvider>
         <LanguageProvider>
-          <ScrollObserver />
-          <Router />
+          <SanityDataProvider>
+            <ScrollObserver />
+            <Router />
+          </SanityDataProvider>
         </LanguageProvider>
       </AuthProvider>
     </StrictMode>

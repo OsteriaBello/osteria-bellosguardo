@@ -5,8 +5,13 @@ import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
 export const sanityClient = createClient({
   projectId: import.meta.env.VITE_SANITY_PROJECT_ID || 'jjup9d37',
   dataset: import.meta.env.VITE_SANITY_DATASET || 'production',
-  useCdn: true,
+  useCdn: true, // Use CDN for production
   apiVersion: '2024-01-01',
+  perspective: 'published', // Only fetch published documents
+  stega: {
+    enabled: false,
+    studioUrl: '/studio'
+  }
 })
 
 const builder = imageUrlBuilder(sanityClient)

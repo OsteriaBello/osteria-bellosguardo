@@ -6,6 +6,7 @@ interface SanityDataContextType {
   data: SiteData | null
   loading: boolean
   error: string | null
+  refresh: () => Promise<void>
 }
 
 const defaultData: SiteData = {
@@ -25,6 +26,7 @@ const SanityDataContext = createContext<SanityDataContextType>({
   data: null,
   loading: true,
   error: null,
+  refresh: async () => {},
 })
 
 export const useSanityData = () => useContext(SanityDataContext)
@@ -38,27 +40,35 @@ export const SanityDataProvider: React.FC<Props> = ({ children }) => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-        const result = await fetchAllSiteData()
-        setData(result || defaultData)
-      } catch (err) {
-        console.error('Error fetching Sanity data:', err)
-        setError(err instanceof Error ? err.message : 'Failed to load data')
-        setData(defaultData)
-      } finally {
-        setLoading(false)
-      }
+  const loadData = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      console.log('🔄 Fetching data from Sanity...')
+      const result = await fetchAllSiteData()
+      console.log('✅ Data fetched:', result)
+      
+      setData(result || defaultData)
+    } catch (err) {
+      console.error('❌ Error fetching Sanity data:', err)
+      setError(err instanceof Error ? err.message : 'Failed to load data')
+      setData(defaultData)
+    } finally {
+      setLoading(false)
     }
+  }
 
+  const refresh = async () => {
+    await loadData()
+  }
+
+  useEffect(() => {
     loadData()
   }, [])
 
   return (
-    <SanityDataContext.Provider value={{ data, loading, error }}>
+    <SanityDataContext.Provider value={{ data, loading, error, refresh }}>
       {children}
     </SanityDataContext.Provider>
   )
