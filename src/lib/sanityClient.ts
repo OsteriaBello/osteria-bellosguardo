@@ -32,3 +32,8 @@ export const getImageUrl = (
   }
   return fallback || ''
 }
+
+console.log('🔑 Sanity Config:', {
+  projectId: import.meta.env.VITE_SANITY_PROJECT_ID,
+  dataset: import.meta.env.VITE_SANITY_DATASET,
+})
