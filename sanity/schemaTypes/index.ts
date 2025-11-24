@@ -4,6 +4,7 @@ import menuCategory from './menuCategory'
 import menuItem from './menuItem'
 import gallery from './gallery'
 import news from './news'
+import newsAndEvents from './newsAndEvents'
 import reviews from './reviews'
 import contact from './contact'
 import footer from './footer'
@@ -16,6 +17,7 @@ export const schemaTypes = [
   menuItem,
   gallery,
   news,
+  newsAndEvents,
   reviews,
   contact,
   footer,

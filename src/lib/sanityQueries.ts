@@ -117,14 +117,40 @@ export const fetchGallery = async (): Promise<SanityGallery | null> => {
   }
 }
 
-// News
+// News - fetch from newsAndEvents section if available, otherwise fall back to query
 export const fetchNews = async (limit = 6): Promise<SanityNews[]> => {
-  const query = `*[_type == "news" && published == true] | order(publishedAt desc)[0...${limit}]`
-  
   try {
-    const result = await sanityClient.fetch(query)
-    console.log(`📰 Fetched ${result?.length || 0} news items`)
-    return result || []
+    // First try to fetch from the newsAndEvents section (respects manual ordering)
+    let result = await sanityClient.fetch(`
+      *[_id == "newsAndEvents"][0] {
+        "items": items[]-> {
+          _id,
+          titlePt,
+          titleEn,
+          contentPt,
+          contentEn,
+          type,
+          image,
+          imageUrl,
+          eventDate,
+          published,
+          publishedAt
+        }
+      }
+    `)
+    
+    if (result?.items && result.items.length > 0) {
+      // Filter published items and limit
+      const filtered = result.items.filter((item: any) => item.published).slice(0, limit)
+      console.log(`📰 Fetched ${filtered.length} news items from section`)
+      return filtered
+    }
+    
+    // Fallback to direct query if section doesn't exist
+    const query = `*[_type == "news" && published == true] | order(publishedAt desc)[0...${limit}]`
+    const fallbackResult = await sanityClient.fetch(query)
+    console.log(`📰 Fetched ${fallbackResult?.length || 0} news items (fallback)`)
+    return fallbackResult || []
   } catch (error) {
     console.error('Error fetching news:', error)
     return []
