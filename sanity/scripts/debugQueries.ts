@@ -7,6 +7,18 @@ async function debugQueries() {
   console.log('🔍 Debugging Sanity queries...\n')
 
   try {
+    // Test 0: Check all singleton documents
+    console.log('0️⃣ Checking Singleton Documents:')
+    const singletons = ['siteSettings', 'hero', 'gallery', 'reviews', 'contact', 'footer', 'translations']
+    for (const singleton of singletons) {
+      const doc = await client.fetch(`*[_id == $id]`, { id: singleton })
+      console.log(`${singleton}: ${doc.length > 0 ? '✅ Found' : '❌ Not found'}`)
+      if (doc.length > 0) {
+        console.log(`  ID: ${doc[0]._id}, Type: ${doc[0]._type}`)
+      }
+    }
+    console.log('\n')
+
     // Test 1: Check all menu categories
     console.log('1️⃣ All Menu Categories:')
     const allCategories = await client.fetch(`*[_type == "menuCategory"]`)

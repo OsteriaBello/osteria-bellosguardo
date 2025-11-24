@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
-import { fetchAllSiteData } from '../lib/sanityQueries'
+import { fetchAllSiteData, debugDocuments } from '../lib/sanityQueries'
 import type { SiteData } from '../types/sanity'
 
 interface SanityDataContextType {
@@ -46,6 +46,9 @@ export const SanityDataProvider: React.FC<Props> = ({ children }) => {
       setError(null)
       
       console.log('🔄 Fetching data from Sanity...')
+      // Run debug first to see what documents exist
+      await debugDocuments()
+      
       const result = await fetchAllSiteData()
       console.log('✅ Data fetched:', result)
       

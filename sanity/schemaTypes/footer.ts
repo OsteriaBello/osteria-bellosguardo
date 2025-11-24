@@ -4,6 +4,8 @@ export default defineType({
   name: 'footer',
   title: 'Footer',
   type: 'document',
+  id: 'footer',
+  __experimental_actions: [/*'create',*/ 'update', /*'delete',*/ 'publish'],
   fields: [
     defineField({
       name: 'experiencePt',

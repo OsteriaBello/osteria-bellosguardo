@@ -4,6 +4,8 @@ export default defineType({
   name: 'contact',
   title: 'Contact & Reservations',
   type: 'document',
+  id: 'contact',
+  __experimental_actions: [/*'create',*/ 'update', /*'delete',*/ 'publish'],
   fields: [
     defineField({
       name: 'reservationsTitlePt',

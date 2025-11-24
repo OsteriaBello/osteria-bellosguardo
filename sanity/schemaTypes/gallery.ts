@@ -4,6 +4,8 @@ export default defineType({
   name: 'gallery',
   title: 'Gallery',
   type: 'document',
+  id: 'gallery',
+  __experimental_actions: [/*'create',*/ 'update', /*'delete',*/ 'publish'],
   fields: [
     defineField({
       name: 'titlePt',

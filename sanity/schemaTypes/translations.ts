@@ -4,6 +4,8 @@ export default defineType({
   name: 'translations',
   title: 'Translations',
   type: 'document',
+  id: 'translations',
+  __experimental_actions: [/*'create',*/ 'update', /*'delete',*/ 'publish'],
   fields: [
     defineField({
       name: 'nav',

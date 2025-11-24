@@ -4,6 +4,8 @@ export default defineType({
   name: 'hero',
   title: 'Hero Section',
   type: 'document',
+  id: 'hero',
+  __experimental_actions: [/*'create',*/ 'update', /*'delete',*/ 'publish'],
   fields: [
     defineField({
       name: 'backgroundImages',

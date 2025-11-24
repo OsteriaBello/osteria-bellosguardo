@@ -4,6 +4,8 @@ export default defineType({
   name: 'reviews',
   title: 'Reviews Section',
   type: 'document',
+  id: 'reviews',
+  __experimental_actions: [/*'create',*/ 'update', /*'delete',*/ 'publish'],
   fields: [
     defineField({
       name: 'tripadvisor',
