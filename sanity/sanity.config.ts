@@ -62,11 +62,8 @@ export default defineConfig({
               .child(S.document().schemaType('footer').documentId('footer')),
             S.divider(),
             S.listItem()
-              .title('News & Events Section')
+              .title('News & Events')
               .child(S.document().schemaType('newsAndEvents').documentId('newsAndEvents')),
-            S.listItem()
-              .title('All News Items')
-              .child(S.documentList().title('News').filter('_type == "news"')),
             S.listItem()
               .title('Translations')
               .child(S.document().schemaType('translations').documentId('translations')),

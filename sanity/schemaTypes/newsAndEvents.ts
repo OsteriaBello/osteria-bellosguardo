@@ -25,15 +25,12 @@ export default defineType({
         {
           type: 'reference',
           to: [{ type: 'news' }],
-          options: {
-            disableNew: false, // Allow creating new items directly
-          },
         },
       ],
       options: {
         sortable: true, // Enable drag-and-drop reordering
       },
-      description: 'Drag to reorder items. Only published news items will appear on the frontend.',
+      description: 'Drag to reorder items. Order shown on frontend respects this list.',
     }),
   ],
   preview: {

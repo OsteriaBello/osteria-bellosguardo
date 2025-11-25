@@ -117,13 +117,13 @@ export const fetchGallery = async (): Promise<SanityGallery | null> => {
   }
 }
 
-// News - fetch from newsAndEvents section if available, otherwise fall back to query
+// News - fetch from newsAndEvents section with EXACT ordering preserved
 export const fetchNews = async (limit = 6): Promise<SanityNews[]> => {
   try {
-    // First try to fetch from the newsAndEvents section (respects manual ordering)
-    let result = await sanityClient.fetch(`
+    // Fetch from the newsAndEvents section preserving the exact order
+    const result = await sanityClient.fetch(`
       *[_id == "newsAndEvents"][0] {
-        "items": items[]-> {
+        items[0..100]-> {
           _id,
           titlePt,
           titleEn,
@@ -134,23 +134,25 @@ export const fetchNews = async (limit = 6): Promise<SanityNews[]> => {
           imageUrl,
           eventDate,
           published,
-          publishedAt
+          publishedAt,
+          _createdAt
         }
       }
     `)
     
-    if (result?.items && result.items.length > 0) {
-      // Filter published items and limit
-      const filtered = result.items.filter((item: any) => item.published).slice(0, limit)
-      console.log(`📰 Fetched ${filtered.length} news items from section`)
-      return filtered
+    if (result?.items && Array.isArray(result.items)) {
+      // Filter only published items, maintain order, then limit
+      const filtered = result.items
+        .filter((item: any) => item && item.published === true)
+        .slice(0, limit)
+      
+      console.log(`📰 Fetched ${filtered.length} news items in section order`)
+      console.log('📋 Items order:', filtered.map((i: any) => `"${i.titleEn}"`).join(' → '))
+      return filtered || []
     }
     
-    // Fallback to direct query if section doesn't exist
-    const query = `*[_type == "news" && published == true] | order(publishedAt desc)[0...${limit}]`
-    const fallbackResult = await sanityClient.fetch(query)
-    console.log(`📰 Fetched ${fallbackResult?.length || 0} news items (fallback)`)
-    return fallbackResult || []
+    console.log(`📰 No news items found in section`)
+    return []
   } catch (error) {
     console.error('Error fetching news:', error)
     return []
