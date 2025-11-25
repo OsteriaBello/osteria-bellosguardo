@@ -39,10 +39,3 @@ export const getImageUrl = (
   }
   return fallback || ''
 }
-
-console.log('🔑 Sanity Config:', {
-  projectId,
-  dataset,
-  useCdn: false,
-  apiVersion: '2024-01-01',
-})

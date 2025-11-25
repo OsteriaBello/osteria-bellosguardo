@@ -26,7 +26,6 @@ export const fetchSiteSettings = async (): Promise<SanitySiteSettings | null> =>
     result = await sanityClient.fetch(`*[_type == "siteSettings"][0]`)
     return result || null
   } catch (error) {
-    console.error('Error fetching siteSettings:', error)
     return null
   }
 }
@@ -46,7 +45,6 @@ export const fetchHero = async (): Promise<SanityHero | null> => {
     result = await sanityClient.fetch(`*[_type == "hero"][0]`)
     return result || null
   } catch (error) {
-    console.error('Error fetching hero:', error)
     return null
   }
 }
@@ -94,10 +92,8 @@ export const fetchMenuCategories = async (menuType: 'food' | 'drinks'): Promise<
       items: cat.items?.map((i: any) => i.item).filter(Boolean) || []
     }))
     
-    console.log(`📋 Fetched ${transformed?.length || 0} ${menuType} categories`)
     return transformed
   } catch (error) {
-    console.error(`Error fetching ${menuType} menu:`, error)
     return []
   }
 }
@@ -112,7 +108,6 @@ export const fetchGallery = async (): Promise<SanityGallery | null> => {
     result = await sanityClient.fetch(`*[_type == "gallery"][0]`)
     return result || null
   } catch (error) {
-    console.error('Error fetching gallery:', error)
     return null
   }
 }
@@ -146,15 +141,11 @@ export const fetchNews = async (limit = 6): Promise<SanityNews[]> => {
         .filter((item: any) => item && item.published === true)
         .slice(0, limit)
       
-      console.log(`📰 Fetched ${filtered.length} news items in section order`)
-      console.log('📋 Items order:', filtered.map((i: any) => `"${i.titleEn}"`).join(' → '))
       return filtered || []
     }
     
-    console.log(`📰 No news items found in section`)
     return []
   } catch (error) {
-    console.error('Error fetching news:', error)
     return []
   }
 }
@@ -169,7 +160,6 @@ export const fetchReviews = async (): Promise<SanityReviews | null> => {
     result = await sanityClient.fetch(`*[_type == "reviews"][0]`)
     return result || null
   } catch (error) {
-    console.error('Error fetching reviews:', error)
     return null
   }
 }
@@ -184,7 +174,6 @@ export const fetchContact = async (): Promise<SanityContact | null> => {
     result = await sanityClient.fetch(`*[_type == "contact"][0]`)
     return result || null
   } catch (error) {
-    console.error('Error fetching contact:', error)
     return null
   }
 }
@@ -199,7 +188,6 @@ export const fetchFooter = async (): Promise<SanityFooter | null> => {
     result = await sanityClient.fetch(`*[_type == "footer"][0]`)
     return result || null
   } catch (error) {
-    console.error('Error fetching footer:', error)
     return null
   }
 }
@@ -214,7 +202,6 @@ export const fetchTranslations = async (): Promise<SanityTranslations | null> =>
     result = await sanityClient.fetch(`*[_type == "translations"][0]`)
     return result || null
   } catch (error) {
-    console.error('Error fetching translations:', error)
     return null
   }
 }
@@ -222,7 +209,6 @@ export const fetchTranslations = async (): Promise<SanityTranslations | null> =>
 // Test function to check what documents exist
 export const debugDocuments = async () => {
   const singletons = ['siteSettings', 'hero', 'gallery', 'reviews', 'contact', 'footer', 'translations']
-  console.log('🔍 Checking for singleton documents...')
   
   for (const singleton of singletons) {
     // Check published version
@@ -231,26 +217,18 @@ export const debugDocuments = async () => {
       // Check draft version
       docs = await sanityClient.fetch(`*[_id == $id]`, { id: `drafts.${singleton}` })
     }
-    console.log(`  ${singleton}: ${docs.length > 0 ? '✅' : '❌'}`, docs.length > 0 ? docs[0]._id : 'not found')
   }
   
   // Also check by type
-  console.log('\n📋 Checking by type:')
   const types = ['siteSettings', 'hero', 'gallery', 'reviews', 'contact', 'footer', 'translations']
   for (const type of types) {
-    const docs = await sanityClient.fetch(`*[_type == $type]`, { type })
-    console.log(`  _type == "${type}": ${docs.length} documents`)
-    if (docs.length > 0) {
-      console.log(`    First ID: ${docs[0]._id}`)
-    }
+    await sanityClient.fetch(`*[_type == $type]`, { type })
   }
 }
 
 // Fetch all data at once - COMPLETELY REWRITTEN
 export const fetchAllSiteData = async () => {
   try {
-    console.log('🔍 Fetching all data from Sanity...')
-    
     // Fetch independent documents in parallel
     const [siteSettings, hero, gallery, reviews, contact, footer, translations, foodMenuCategories, drinksMenuCategories] = await Promise.all([
       sanityClient.fetch(`*[_type == "siteSettings"][0]`),
@@ -263,16 +241,6 @@ export const fetchAllSiteData = async () => {
       sanityClient.fetch(`*[_type == "menuCategory" && menuType == "food"] | order(_createdAt asc)`),
       sanityClient.fetch(`*[_type == "menuCategory" && menuType == "drinks"] | order(_createdAt asc)`),
     ])
-
-    console.log('siteSettings:', siteSettings)
-    console.log('hero:', hero)
-    console.log('gallery:', gallery)
-    console.log('reviews:', reviews)
-    console.log('contact:', contact)
-    console.log('footer:', footer)
-    console.log('translations:', translations)
-    console.log('foodMenuCategories:', foodMenuCategories)
-    console.log('drinksMenuCategories:', drinksMenuCategories)
 
     // Fetch news separately and in parallel with menu items
     const [news, foodMenu, drinksMenu] = await Promise.all([
@@ -305,8 +273,6 @@ export const fetchAllSiteData = async () => {
       ),
     ])
 
-    console.log('news:', news)
-
     const result = {
       siteSettings,
       hero,
@@ -320,21 +286,8 @@ export const fetchAllSiteData = async () => {
       translations
     }
 
-    console.log('✅ Data fetched successfully:', {
-      siteSettings: !!siteSettings,
-      hero: !!hero,
-      foodMenu: foodMenu?.length || 0,
-      drinksMenu: drinksMenu?.length || 0,
-      gallery: !!gallery,
-      news: news?.length || 0,
-      reviews: !!reviews,
-      contact: !!contact,
-      footer: !!footer,
-    })
-
     return result
   } catch (error) {
-    console.error('❌ Error fetching all site data:', error)
     throw error
   }
 }

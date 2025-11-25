@@ -13,7 +13,6 @@ const ReservationForm = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Ici, vous pouvez ajouter la logique pour envoyer le formulaire
-    console.log('Reserva enviada:', formData);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {

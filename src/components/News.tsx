@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Calendar, Clock, Newspaper, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Newspaper, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSanityData } from '../contexts/SanityDataContext';
 import { getImageUrl } from '../lib/sanityClient';
@@ -22,7 +22,6 @@ const News: React.FC = () => {
   const { t, language } = useLanguage();
   const { data: sanityData, loading: sanityLoading } = useSanityData();
   const [supabaseNews, setSupabaseNews] = useState<SupabaseNewsItem[]>([]);
-  const [supabaseLoading, setSupabaseLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
 
@@ -50,10 +49,8 @@ const News: React.FC = () => {
       } else if (data) {
         setSupabaseNews(data);
       }
-    } catch (err) {
-      console.error('Supabase fetch error:', err);
     } finally {
-      setSupabaseLoading(false);
+      // Handle loading state if needed
     }
   };
 
@@ -64,19 +61,6 @@ const News: React.FC = () => {
   const loading = sanityNews.length === 0 && sanityLoading;
 
   const totalPages = Math.ceil(newsItems.length / itemsPerPage);
-
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      });
-    } catch {
-      return dateString;
-    }
-  };
 
   const formatDateBadge = (dateString: string) => {
     try {
