@@ -261,7 +261,7 @@ export const fetchAllSiteData = async () => {
     const gallery = await sanityClient.fetch(`*[_type == "gallery"][0]`)
     console.log('gallery:', gallery)
     
-    const news = await sanityClient.fetch(`*[_type == "news" && published == true] | order(publishedAt desc)[0...6]`)
+    const news = await fetchNews(6)
     console.log('news:', news)
     
     const reviews = await sanityClient.fetch(`*[_type == "reviews"][0]`)
