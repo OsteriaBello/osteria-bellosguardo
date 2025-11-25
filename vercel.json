@@ -1,0 +1,14 @@
+{
+  "redirects": [
+    {
+      "source": "/studio",
+      "destination": "https://osteria-bt.sanity.studio/",
+      "permanent": false
+    },
+    {
+      "source": "/studio/:path*",
+      "destination": "https://osteria-bt.sanity.studio/:path*",
+      "permanent": false
+    }
+  ]
+}
