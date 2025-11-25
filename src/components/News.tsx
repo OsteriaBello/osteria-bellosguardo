@@ -103,7 +103,7 @@ const News: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-[#d4896b] border-r-transparent"></div>
-            <p className="mt-4 text-gray-600">Carregando novidades...</p>
+            <p className="mt-4 text-gray-600"></p>
           </div>
         </div>
       </section>
