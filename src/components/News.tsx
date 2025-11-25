@@ -60,7 +60,8 @@ const News: React.FC = () => {
   // Use Sanity news if available, otherwise fallback to Supabase
   const sanityNews = sanityData?.news || [];
   const newsItems = sanityNews.length > 0 ? sanityNews : supabaseNews;
-  const loading = sanityLoading && supabaseLoading;
+  // Only show loading if we have no items AND Sanity is still loading
+  const loading = sanityNews.length === 0 && sanityLoading;
 
   const totalPages = Math.ceil(newsItems.length / itemsPerPage);
 

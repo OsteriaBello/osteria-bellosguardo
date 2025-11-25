@@ -251,66 +251,61 @@ export const fetchAllSiteData = async () => {
   try {
     console.log('🔍 Fetching all data from Sanity...')
     
-    // Fetch documents one by one
-    const siteSettings = await sanityClient.fetch(`*[_type == "siteSettings"][0]`)
-    console.log('siteSettings:', siteSettings)
-    
-    const hero = await sanityClient.fetch(`*[_type == "hero"][0]`)
-    console.log('hero:', hero)
-    
-    const gallery = await sanityClient.fetch(`*[_type == "gallery"][0]`)
-    console.log('gallery:', gallery)
-    
-    const news = await fetchNews(6)
-    console.log('news:', news)
-    
-    const reviews = await sanityClient.fetch(`*[_type == "reviews"][0]`)
-    console.log('reviews:', reviews)
-    
-    const contact = await sanityClient.fetch(`*[_type == "contact"][0]`)
-    console.log('contact:', contact)
-    
-    const footer = await sanityClient.fetch(`*[_type == "footer"][0]`)
-    console.log('footer:', footer)
-    
-    const translations = await sanityClient.fetch(`*[_type == "translations"][0]`)
-    console.log('translations:', translations)
+    // Fetch independent documents in parallel
+    const [siteSettings, hero, gallery, reviews, contact, footer, translations, foodMenuCategories, drinksMenuCategories] = await Promise.all([
+      sanityClient.fetch(`*[_type == "siteSettings"][0]`),
+      sanityClient.fetch(`*[_type == "hero"][0]`),
+      sanityClient.fetch(`*[_type == "gallery"][0]`),
+      sanityClient.fetch(`*[_type == "reviews"][0]`),
+      sanityClient.fetch(`*[_type == "contact"][0]`),
+      sanityClient.fetch(`*[_type == "footer"][0]`),
+      sanityClient.fetch(`*[_type == "translations"][0]`),
+      sanityClient.fetch(`*[_type == "menuCategory" && menuType == "food"] | order(_createdAt asc)`),
+      sanityClient.fetch(`*[_type == "menuCategory" && menuType == "drinks"] | order(_createdAt asc)`),
+    ])
 
-    // Fetch menu categories
-    const foodMenuCategories = await sanityClient.fetch(`*[_type == "menuCategory" && menuType == "food"] | order(_createdAt asc)`)
+    console.log('siteSettings:', siteSettings)
+    console.log('hero:', hero)
+    console.log('gallery:', gallery)
+    console.log('reviews:', reviews)
+    console.log('contact:', contact)
+    console.log('footer:', footer)
+    console.log('translations:', translations)
     console.log('foodMenuCategories:', foodMenuCategories)
-    
-    const drinksMenuCategories = await sanityClient.fetch(`*[_type == "menuCategory" && menuType == "drinks"] | order(_createdAt asc)`)
     console.log('drinksMenuCategories:', drinksMenuCategories)
 
-    // Fetch items for each category
-    const foodMenu = await Promise.all(
-      (foodMenuCategories || []).map(async (cat: any) => {
-        if (!cat.items || cat.items.length === 0) {
-          return { ...cat, items: [] }
-        }
-        const itemIds = cat.items.map((item: any) => item._ref)
-        const items = await sanityClient.fetch(
-          `*[_type == "menuItem" && _id in $ids]`,
-          { ids: itemIds }
-        )
-        return { ...cat, items }
-      })
-    )
+    // Fetch news separately and in parallel with menu items
+    const [news, foodMenu, drinksMenu] = await Promise.all([
+      fetchNews(6),
+      Promise.all(
+        (foodMenuCategories || []).map(async (cat: any) => {
+          if (!cat.items || cat.items.length === 0) {
+            return { ...cat, items: [] }
+          }
+          const itemIds = cat.items.map((item: any) => item._ref)
+          const items = await sanityClient.fetch(
+            `*[_type == "menuItem" && _id in $ids]`,
+            { ids: itemIds }
+          )
+          return { ...cat, items }
+        })
+      ),
+      Promise.all(
+        (drinksMenuCategories || []).map(async (cat: any) => {
+          if (!cat.items || cat.items.length === 0) {
+            return { ...cat, items: [] }
+          }
+          const itemIds = cat.items.map((item: any) => item._ref)
+          const items = await sanityClient.fetch(
+            `*[_type == "menuItem" && _id in $ids]`,
+            { ids: itemIds }
+          )
+          return { ...cat, items }
+        })
+      ),
+    ])
 
-    const drinksMenu = await Promise.all(
-      (drinksMenuCategories || []).map(async (cat: any) => {
-        if (!cat.items || cat.items.length === 0) {
-          return { ...cat, items: [] }
-        }
-        const itemIds = cat.items.map((item: any) => item._ref)
-        const items = await sanityClient.fetch(
-          `*[_type == "menuItem" && _id in $ids]`,
-          { ids: itemIds }
-        )
-        return { ...cat, items }
-      })
-    )
+    console.log('news:', news)
 
     const result = {
       siteSettings,
