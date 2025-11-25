@@ -180,6 +180,12 @@ export interface SanityFooter {
   contactTitleEn?: string
   followUsTitlePt?: string
   followUsTitleEn?: string
+  address?: {
+    street?: string
+    neighborhood?: string
+    city?: string
+    country?: string
+  }
   socialLinks?: Array<{
     platform?: string
     url?: string

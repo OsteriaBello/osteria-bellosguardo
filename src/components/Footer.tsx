@@ -33,7 +33,7 @@ const Footer = () => {
     ? (language === 'pt' ? footer.rightsTextPt : footer.rightsTextEn)
     : t('footer.rights');
 
-  const address = contact?.address || {
+  const address = footer?.address || contact?.address || {
     street: 'R. do Castelo Picão 11 13',
     neighborhood: '',
     city: '1100-125 Lisboa',
@@ -126,14 +126,14 @@ const Footer = () => {
 
           <div>
             <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">{followUsTitle}</h4>
-            <div className="flex flex-wrap gap-3 sm:gap-4">
+            <div className="flex gap-4 items-center">
               {socialLinks.map((link, idx) => (
                 <a
                   key={idx}
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-[#d4896b] hover:opacity-80 transition-all"
+                  className="hover:text-[#d4896b] hover:opacity-80 transition-all inline-flex items-center justify-center"
                   aria-label={link.label || link.platform}
                 >
                   {renderSocialIcon(link)}

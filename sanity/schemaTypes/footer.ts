@@ -108,6 +108,18 @@ export default defineType({
       type: 'string',
     }),
     defineField({
+      name: 'address',
+      title: 'Footer Address',
+      type: 'object',
+      fields: [
+        { name: 'street', title: 'Street', type: 'string' },
+        { name: 'neighborhood', title: 'Neighborhood/Area', type: 'string' },
+        { name: 'city', title: 'City & Postal Code', type: 'string' },
+        { name: 'country', title: 'Country', type: 'string' },
+      ],
+      description: 'Separate address for footer (different from Contact & Reservations)',
+    }),
+    defineField({
       name: 'createdBy',
       title: 'Created By',
       type: 'object',
