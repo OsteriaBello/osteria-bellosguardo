@@ -21,5 +21,5 @@ export const schemaTypes = [
   reviews,
   contact,
   footer,
-  translations,
+  //translations,
 ]
