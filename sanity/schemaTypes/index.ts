@@ -8,7 +8,6 @@ import newsAndEvents from './newsAndEvents'
 import reviews from './reviews'
 import contact from './contact'
 import footer from './footer'
-import translations from './translations'
 
 export const schemaTypes = [
   siteSettings,
@@ -21,5 +20,4 @@ export const schemaTypes = [
   reviews,
   contact,
   footer,
-  //translations,
 ]

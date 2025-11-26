@@ -64,9 +64,6 @@ export default defineConfig({
             S.listItem()
               .title('News & Events')
               .child(S.document().schemaType('newsAndEvents').documentId('newsAndEvents')),
-            S.listItem()
-              .title('Translations')
-              .child(S.document().schemaType('translations').documentId('translations')),
           ]),
     }),
     visionTool(),
