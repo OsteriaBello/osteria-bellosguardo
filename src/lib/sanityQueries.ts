@@ -242,32 +242,33 @@ export const fetchAllSiteData = async () => {
       sanityClient.fetch(`*[_type == "menuCategory" && menuType == "drinks"] | order(_createdAt asc)`),
     ])
 
+    // Helper function to preserve order when fetching items
+    const fetchItemsPreservingOrder = async (itemRefs: any[]) => {
+      if (!itemRefs || itemRefs.length === 0) {
+        return []
+      }
+      const itemIds = itemRefs.map((item: any) => item._ref)
+      const items = await sanityClient.fetch(
+        `*[_type == "menuItem" && _id in $ids]`,
+        { ids: itemIds }
+      )
+      
+      // Reorder items to match the original order from the category
+      return itemIds.map((id: string) => items.find((item: any) => item._id === id)).filter(Boolean)
+    }
+
     // Fetch news separately and in parallel with menu items
     const [news, foodMenu, drinksMenu] = await Promise.all([
       fetchNews(6),
       Promise.all(
         (foodMenuCategories || []).map(async (cat: any) => {
-          if (!cat.items || cat.items.length === 0) {
-            return { ...cat, items: [] }
-          }
-          const itemIds = cat.items.map((item: any) => item._ref)
-          const items = await sanityClient.fetch(
-            `*[_type == "menuItem" && _id in $ids]`,
-            { ids: itemIds }
-          )
+          const items = await fetchItemsPreservingOrder(cat.items)
           return { ...cat, items }
         })
       ),
       Promise.all(
         (drinksMenuCategories || []).map(async (cat: any) => {
-          if (!cat.items || cat.items.length === 0) {
-            return { ...cat, items: [] }
-          }
-          const itemIds = cat.items.map((item: any) => item._ref)
-          const items = await sanityClient.fetch(
-            `*[_type == "menuItem" && _id in $ids]`,
-            { ids: itemIds }
-          )
+          const items = await fetchItemsPreservingOrder(cat.items)
           return { ...cat, items }
         })
       ),
